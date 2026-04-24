@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MindFree">
+<meta name="theme-color" content="#0C0C0F">
+<title>MindFree</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230C0C0F'/><text y='.9em' font-size='72' x='12'>🧠</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230C0C0F'/><text y='.9em' font-size='72' x='12'>🧠</text></svg>">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0C0C0F;--card:#1C1C23;--border:rgba(255,255,255,0.07);--red:#FF3B3B;--green:#00E87A;--amber:#FFB020;--text:#fff;--muted:rgba(255,255,255,0.55);--muted2:rgba(255,255,255,0.35);--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI',sans-serif;display:flex;flex-direction:column;padding-top:var(--safe-top);padding-bottom:var(--safe-bottom)}
+.topbar{background:rgba(12,12,15,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:14px 20px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-title{font-size:20px;font-weight:900;letter-spacing:2px;color:var(--text)}
+.topbar-title span{color:var(--red)}
+.checkin-btn{background:rgba(255,59,59,.15);border:1px solid rgba(255,59,59,.3);border-radius:8px;padding:7px 14px;font-size:10px;color:var(--red);letter-spacing:1px;cursor:pointer}
+.tabbar{display:flex;background:rgba(12,12,15,.98);border-top:1px solid var(--border);padding-bottom:var(--safe-bottom);flex-shrink:0}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 8px;cursor:pointer;font-size:10px;color:var(--muted);transition:color .2s;border:none;background:none;-webkit-tap-highlight-color:transparent}
+.tab.active{color:var(--red)}
+.tab-icon{font-size:20px;margin-bottom:3px}
+.screens{flex:1;overflow:hidden;position:relative}
+.screen{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 24px;display:none;animation:fadeIn .25s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* INSTALL BANNER - MonBudget exact */
+.install-banner{display:none;margin-bottom:14px;background:linear-gradient(135deg,rgba(255,59,59,.2),rgba(255,59,59,.05));border:1px solid rgba(255,59,59,.3);border-radius:16px;padding:14px 16px;align-items:center;gap:12px}
+.install-banner.show{display:flex}
+.install-txt{flex:1;font-size:12.5px;color:var(--muted);line-height:1.5}
+.install-txt strong{color:var(--text);display:block;margin-bottom:2px}
+.install-btn{background:var(--red);color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+
+/* STAT */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;text-align:center;position:relative;overflow:hidden}
+.stat-box::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.s1::after{background:var(--red)}.s2::after{background:var(--amber)}.s3::after{background:var(--green)}
+.stat-num{font-size:28px;font-weight:900;display:block;line-height:1}
+.s1 .stat-num{color:var(--red)}.s2 .stat-num{color:var(--amber)}.s3 .stat-num{color:var(--green)}
+.stat-lbl{font-size:9px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+
+/* CHECKIN CARD */
+.checkin-card{background:linear-gradient(135deg,#1A0808,#1E1010);border:1px solid rgba(255,59,59,.2);border-radius:16px;padding:20px;margin-bottom:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.checkin-tag{font-size:9px;color:var(--red);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.checkin-title{font-size:20px;font-weight:900;color:var(--text)}
+.checkin-sub{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* CHAPTER */
+.chapter-item{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:14px;padding:16px 18px;-webkit-tap-highlight-color:transparent}
+.chapter-item.done{border-color:rgba(0,232,122,.2)}
+.chapter-num{font-size:28px;font-weight:900;color:var(--muted2);min-width:36px}
+.chapter-item.done .chapter-num{color:var(--green)}
+.chapter-info{flex:1}
+.chapter-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
+.chapter-meta{font-size:9px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase}
+
+/* READER */
+.reader-bar{position:sticky;top:57px;z-index:50;background:rgba(12,12,15,.95);backdrop-filter:blur(12px);padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.back-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:14px;cursor:pointer;color:var(--text)}
+.progress-bar{flex:1;height:3px;background:rgba(255,255,255,.06);border-radius:10px;overflow:hidden}
+.progress-fill{height:100%;background:var(--red);border-radius:10px;transition:width .4s}
+.reader-num{font-size:10px;color:var(--muted)}
+.chapter-content{padding:24px 20px 40px}
+.ch-tag{display:inline-block;background:rgba(255,59,59,.1);border:1px solid rgba(255,59,59,.2);border-radius:20px;padding:5px 14px;font-size:9px;color:var(--red);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}
+.ch-title{font-size:32px;font-weight:900;color:var(--text);line-height:1.1;margin-bottom:20px}
+.ch-body{font-size:15px;color:var(--muted);line-height:1.8}
+.ch-body p{margin-bottom:16px}
+.ch-body strong{color:var(--text);font-weight:600}
+.fact-box{background:rgba(255,255,255,.04);border-left:3px solid var(--red);border-radius:0 12px 12px 0;padding:16px 18px;margin:20px 0}
+.fact-label{font-size:9px;color:var(--red);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.fact-box p{font-size:13px;color:var(--text);margin:0;line-height:1.6}
+.interactive{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:16px;padding:20px;margin:20px 0}
+.interactive-title{font-size:10px;color:var(--amber);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
+.check-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;cursor:pointer;margin-bottom:8px;-webkit-tap-highlight-color:transparent}
+.check-item.done{border-color:rgba(0,232,122,.3);background:rgba(0,232,122,.05)}
+.check-box{width:20px;height:20px;border:2px solid var(--border);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px}
+.check-item.done .check-box{border-color:var(--green);background:var(--green)}
+.check-text{font-size:13px;color:var(--text)}
+.check-item.done .check-text{color:var(--muted);text-decoration:line-through}
+.reflect-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;color:var(--text);font-size:14px;resize:none;outline:none;line-height:1.6}
+.reflect-save{margin-top:10px;width:100%;padding:12px;background:rgba(255,59,59,.1);border:1px solid rgba(255,59,59,.2);border-radius:10px;font-size:11px;color:var(--red);cursor:pointer;letter-spacing:1px}
+.timer-display{font-size:56px;font-weight:900;color:var(--text);text-align:center;line-height:1}
+.timer-sub{font-size:12px;color:var(--muted2);text-align:center;margin:6px 0 16px}
+.timer-btn{width:100%;padding:13px;background:var(--red);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}
+.timer-btn.running{background:var(--card);border:1px solid var(--border);color:var(--muted)}
+.done-btn{margin-top:28px;width:100%;padding:16px;background:var(--text);color:var(--bg);border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer}
+.done-btn.completed{background:rgba(0,232,122,.1);border:1px solid rgba(0,232,122,.3);color:var(--green);cursor:default}
+
+/* TRACKER */
+.streak-card{background:linear-gradient(135deg,#1A0808,#200E0E);border:1px solid rgba(255,59,59,.2);border-radius:16px;padding:24px;text-align:center;margin-bottom:16px}
+.streak-num{font-size:80px;font-weight:900;color:var(--red);line-height:1;display:block}
+.streak-label{font-size:10px;color:var(--muted2);letter-spacing:3px;text-transform:uppercase}
+.days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:16px}
+.day-cell{aspect-ratio:1;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted2)}
+.day-cell.today{border-color:var(--red);color:var(--red)}
+.day-cell.done{background:rgba(0,232,122,.15);border-color:rgba(0,232,122,.3);color:var(--green)}
+.log-btn{width:100%;margin-top:14px;padding:13px;background:transparent;border:1px dashed rgba(255,59,59,.3);border-radius:10px;font-size:11px;color:rgba(255,59,59,.5);cursor:pointer;letter-spacing:1px}
+
+/* TOOLS */
+.tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tool-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.tool-icon{font-size:28px;margin-bottom:10px}
+.tool-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+.tool-desc{font-size:11px;color:var(--muted2);line-height:1.4}
+.tool-modal{display:none;position:fixed;inset:0;z-index:800;background:rgba(12,12,15,.98);flex-direction:column;padding:48px 24px 40px;overflow-y:auto}
+.tool-modal.show{display:flex}
+.tool-modal-close{position:absolute;top:16px;right:20px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--muted);cursor:pointer}
+.tool-modal-title{font-size:32px;font-weight:900;color:var(--text);letter-spacing:1px;margin-bottom:8px}
+.tool-modal-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+
+/* OVERLAYS */
+.overlay{display:none;position:fixed;inset:0;z-index:1500;background:rgba(12,12,15,.97);flex-direction:column;align-items:center;justify-content:center;padding:32px 24px}
+.overlay.show{display:flex}
+.rx-overlay{display:none;position:fixed;inset:0;z-index:1600;background:rgba(12,12,15,.98);flex-direction:column;align-items:center;justify-content:flex-start;padding:48px 24px 32px;overflow-y:auto}
+.rx-overlay.show{display:flex}
+.option{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px;padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:14px;width:100%;margin-bottom:10px;-webkit-tap-highlight-color:transparent}
+.option.selected{border-color:var(--red);background:rgba(255,59,59,.1)}
+.option-icon{font-size:22px;flex-shrink:0}
+.option-text{font-size:14px;color:var(--text);font-weight:600}
+.option-sub{font-size:11px;color:var(--muted2);margin-top:2px}
+.rx-card{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:12px}
+.rx-card-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.rx-card-label{font-size:10px;color:var(--red);letter-spacing:2px;text-transform:uppercase}
+.rx-card-body{padding:16px 18px;font-size:14px;color:var(--text);line-height:1.7}
+.rx-action{margin-top:10px;background:rgba(255,59,59,.1);border:1px solid rgba(255,59,59,.2);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--red);font-weight:600}
+.overlay-btn{margin-top:24px;width:100%;padding:16px;background:var(--red);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;display:none}
+.overlay-btn.show{display:block}
+.rx-enter{margin-top:28px;width:100%;padding:16px;background:var(--text);color:var(--bg);border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer}
+.splash{position:fixed;inset:0;z-index:2000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s}
+.splash-logo{font-size:64px;font-weight:900;letter-spacing:4px;color:var(--text)}
+.splash-logo span{color:var(--red)}
+.splash-line{width:0;height:2px;background:var(--red);margin-top:24px;animation:grow 1.5s ease forwards}
+@keyframes grow{to{width:180px}}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);border-radius:24px;padding:12px 20px;font-size:13px;color:var(--text);opacity:0;transition:opacity .3s;white-space:nowrap;z-index:3000;pointer-events:none}
+.toast.show{opacity:1}
+.ios-guide{display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.88);align-items:flex-end;justify-content:center;padding-bottom:16px}
+.ios-guide.show{display:flex}
+.ios-card{background:var(--card);border:1px solid rgba(255,59,59,.25);border-radius:24px;padding:28px 24px;width:calc(100% - 32px);max-width:420px;text-align:center}
+.ios-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:6px}
+.ios-sub{font-size:12px;color:var(--muted2);margin-bottom:24px}
+.ios-steps{display:flex;flex-direction:column;gap:14px;margin-bottom:24px;text-align:left}
+.ios-step{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.04);border-radius:12px;padding:12px 14px}
+.ios-num{width:28px;height:28px;border-radius:50%;background:rgba(255,59,59,.15);border:1px solid rgba(255,59,59,.3);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--red);flex-shrink:0;font-weight:700}
+.ios-step-text{font-size:14px;color:rgba(255,255,255,.8);line-height:1.4}
+.ios-step-text strong{color:var(--text)}
+.ios-close{width:100%;padding:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;color:rgba(255,255,255,.5);font-size:14px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="splash" id="splash">
+  <div class="splash-logo">MIND<span>FREE</span></div>
+  <div class="splash-line"></div>
+</div>
+
+<div class="overlay" id="checkinOverlay">
+  <div style="font-size:32px;font-weight:900;text-align:center;margin-bottom:6px;letter-spacing:2px">DAILY CHECK-IN</div>
+  <div style="font-size:13px;color:var(--muted2);text-align:center;margin-bottom:36px;letter-spacing:1px">HOW ARE YOU RIGHT NOW?</div>
+  <div id="checkinOpts" style="width:100%"></div>
+  <button class="overlay-btn" id="checkinBtn" onclick="submitCheckin()">Continue →</button>
+</div>
+
+<div class="rx-overlay" id="rxOverlay">
+  <div style="background:rgba(255,59,59,.1);border:1px solid var(--red);border-radius:20px;padding:6px 16px;font-size:10px;color:var(--red);letter-spacing:2px;margin-bottom:20px">YOUR PROTOCOL</div>
+  <div style="font-size:36px;font-weight:900;text-align:center;letter-spacing:2px;margin-bottom:8px;line-height:1" id="rxTitle"></div>
+  <div style="font-size:14px;color:var(--muted2);text-align:center;margin-bottom:28px" id="rxState"></div>
+  <div id="rxCards" style="width:100%"></div>
+  <button class="rx-enter" onclick="closeRx()">I'm ready. Enter MindFree →</button>
+</div>
+
+<div class="ios-guide" id="iosGuide">
+  <div class="ios-card">
+    <div class="ios-title">Installer MindFree</div>
+    <div class="ios-sub">SUIS CES ETAPES</div>
+    <div class="ios-steps">
+      <div class="ios-step"><div class="ios-num">1</div><div class="ios-step-text" id="s1">Tape les <strong>3 points ⋮</strong> en haut a droite de Chrome</div></div>
+      <div class="ios-step"><div class="ios-num">2</div><div class="ios-step-text" id="s2">Tape sur <strong>"Ajouter a l'ecran d'accueil"</strong></div></div>
+      <div class="ios-step"><div class="ios-num">3</div><div class="ios-step-text" id="s3">Tape sur <strong>"Ajouter"</strong> — icone MindFree installee ✅</div></div>
+    </div>
+    <button class="ios-close" onclick="document.getElementById('iosGuide').classList.remove('show')">Compris</button>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-title">MIND<span>FREE</span></div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="font-size:11px;color:var(--muted)" id="topDay">DAY 1</div>
+    <button class="checkin-btn" onclick="startCheckin()">CHECK-IN</button>
+  </div>
+</div>
+
+<div class="screens">
+
+  <div class="screen active" id="s-home">
+    <div class="install-banner" id="installBanner">
+      <div style="font-size:28px">🧠</div>
+      <div class="install-txt">
+        <strong>Installer l'application</strong>
+        Ajoutez MindFree sur votre ecran d'accueil pour y acceder comme une vraie app.
+      </div>
+      <button class="install-btn" onclick="installApp()">Installer</button>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-box s1"><span class="stat-num" id="statStreak">0</span><div class="stat-lbl">Streak</div></div>
+      <div class="stat-box s2"><span class="stat-num" id="statChapters">0</span><div class="stat-lbl">Chapters</div></div>
+      <div class="stat-box s3"><span class="stat-num" id="statCheckins">0</span><div class="stat-lbl">Check-ins</div></div>
+    </div>
+    <div class="checkin-card" onclick="startCheckin()">
+      <div class="checkin-tag">⚡ REQUIRED TODAY</div>
+      <div class="checkin-title">HOW ARE YOU RIGHT NOW?</div>
+      <div class="checkin-sub">Your daily check-in unlocks a personalized protocol</div>
+    </div>
+    <div style="font-size:9px;color:var(--muted2);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px">THE 20 CHAPTERS</div>
+    <div id="chapterList"></div>
+  </div>
+
+  <div class="screen" id="s-reader">
+    <div class="reader-bar">
+      <button class="back-btn" onclick="closeReader()">← Back</button>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="reader-num" id="readerNum">1/20</div>
+    </div>
+    <div class="chapter-content" id="chapterContent"></div>
+  </div>
+
+  <div class="screen" id="s-tracker">
+    <div style="padding:4px 0">
+      <div class="streak-card">
+        <span class="streak-num" id="trackerStreak">0</span>
+        <div class="streak-label">Day Clean Streak</div>
+      </div>
+      <div class="days-grid" id="daysGrid"></div>
+      <button class="log-btn" onclick="logRelapse()">+ Log a relapse honestly</button>
+    </div>
+  </div>
+
+  <div class="screen" id="s-tools">
+    <div class="tools-grid">
+      <div class="tool-card" onclick="openTool('urge')"><div class="tool-icon">🌊</div><div class="tool-name">Urge Surfer</div><div class="tool-desc">15-min wave timer</div></div>
+      <div class="tool-card" onclick="openTool('breath')"><div class="tool-icon">💨</div><div class="tool-name">4-7-8 Breath</div><div class="tool-desc">Reset protocol</div></div>
+      <div class="tool-card" onclick="openTool('cold')"><div class="tool-icon">🧊</div><div class="tool-name">Cold Shower</div><div class="tool-desc">90-sec dopamine reset</div></div>
+      <div class="tool-card" onclick="openTool('journal')"><div class="tool-icon">📝</div><div class="tool-name">Journal</div><div class="tool-desc">Name the trigger</div></div>
+      <div class="tool-card" onclick="openTool('pushup')"><div class="tool-icon">💪</div><div class="tool-name">20 Push-Ups</div><div class="tool-desc">Physical redirect</div></div>
+      <div class="tool-card" onclick="openTool('mantra')"><div class="tool-icon">⚡</div><div class="tool-name">Power Mantra</div><div class="tool-desc">Rewire the voice</div></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="tabbar">
+  <button class="tab active" id="tab-home" onclick="goTab('home')"><span class="tab-icon">🏠</span>Home</button>
+  <button class="tab" id="tab-reader" style="display:none" onclick="goTab('reader')"><span class="tab-icon">📖</span>Reading</button>
+  <button class="tab" id="tab-tracker" onclick="goTab('tracker')"><span class="tab-icon">📊</span>Tracker</button>
+  <button class="tab" id="tab-tools" onclick="goTab('tools')"><span class="tab-icon">⚡</span>Tools</button>
+</div>
+
+<div class="tool-modal" id="modal-urge"><button class="tool-modal-close" onclick="closeTool('urge')">✕</button><div class="tool-modal-title">URGE SURFER</div><div class="tool-modal-sub">The urge peaks in 15 minutes and crashes if not fed.</div><div class="interactive"><div class="interactive-title">⏱ WAVE TIMER</div><div class="timer-display" id="urgeDisplay">15:00</div><div class="timer-sub">Sit still. Breathe. Watch.</div><button class="timer-btn" id="urgeBtn" onclick="toggleUrge()">START</button></div></div>
+
+<div class="tool-modal" id="modal-breath"><button class="tool-modal-close" onclick="closeTool('breath')">✕</button><div class="tool-modal-title">4-7-8 RESET</div><div class="tool-modal-sub">Kills cortisol in under 2 minutes.</div><div class="interactive"><div class="interactive-title">💨 BREATHING</div><div style="text-align:center;padding:10px 0"><div id="breathCircle" style="width:100px;height:100px;border-radius:50%;border:2px solid var(--red);display:inline-flex;align-items:center;justify-content:center;font-size:12px;color:var(--red);margin-bottom:12px;transition:transform .4s,border-color .4s">READY</div></div><button style="display:block;width:100%;padding:12px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;font-size:11px;color:var(--muted);cursor:pointer" id="breathBtn" onclick="toggleBreath()">START PROTOCOL</button></div></div>
+
+<div class="tool-modal" id="modal-cold"><button class="tool-modal-close" onclick="closeTool('cold')">✕</button><div class="tool-modal-title">COLD SHOWER</div><div class="tool-modal-sub">90 seconds = 250% dopamine increase.</div><div class="interactive"><div class="interactive-title">🧊 90-SEC TIMER</div><div class="timer-display" id="coldDisplay">1:30</div><div class="timer-sub">Turn it cold. Get in.</div><button class="timer-btn" id="coldBtn" onclick="toggleCold()">START</button></div></div>
+
+<div class="tool-modal" id="modal-journal"><button class="tool-modal-close" onclick="closeTool('journal')">✕</button><div class="tool-modal-title">TRIGGER JOURNAL</div><div class="tool-modal-sub">Shame lives in silence. Write it out.</div><div class="interactive"><div class="interactive-title">📝 WHAT HAPPENED?</div><textarea class="reflect-input" id="journalInput" rows="4" placeholder="What triggered you? Time, location, emotional state..."></textarea><button class="reflect-save" onclick="saveJournal()">SAVE ENTRY</button></div><div id="journalEntries" style="margin-top:16px"></div></div>
+
+<div class="tool-modal" id="modal-pushup"><button class="tool-modal-close" onclick="closeTool('pushup')">✕</button><div class="tool-modal-title">20 PUSH-UPS</div><div class="tool-modal-sub">Physical redirect breaks the loop in 45 seconds.</div><div class="interactive"><div class="interactive-title">💪 TAP EACH REP</div><div class="timer-display" id="pushupDisplay">20</div><div class="timer-sub">Tap for each rep</div><button class="timer-btn" id="pushupBtn" onclick="countPushup()">TAP FOR EACH REP</button></div></div>
+
+<div class="tool-modal" id="modal-mantra"><button class="tool-modal-close" onclick="closeTool('mantra')">✕</button><div class="tool-modal-title">POWER MANTRA</div><div class="tool-modal-sub">Say this out loud. Not in your head.</div><div class="interactive"><div class="interactive-title">⚡ TODAY'S MANTRA</div><div id="mantraText" style="font-size:24px;font-weight:900;color:var(--text);line-height:1.3;text-align:center;padding:16px 0"></div><button class="reflect-save" onclick="nextMantra()">NEXT MANTRA →</button></div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CHAPTERS=[
+  {id:1,tag:"FOUNDATION",title:"The Illusion of Free Will",meta:"8 min · Neuroscience",body:"<p>Let's start with a brutal fact: <strong>you are not in control right now.</strong> Your hand reaches for your phone before your conscious mind even registers the impulse. Stanford neuroscientist Robert Sapolsky spent 40 years studying this. His conclusion? Most human behavior is the result of biological and environmental forces — not choice.</p><p>Your brain runs on <strong>prediction loops</strong>. It anticipates rewards based on past experience, then generates impulses to seek them. This is the dopaminergic system — and it doesn't care about your values, your family, or your goals.</p><p>The first step to freedom is <strong>seeing the machine.</strong> When the urge hits, name it: 'This is a dopamine prediction loop. Not me.' That 1-second pause creates a neurological gap — and that gap is where your freedom lives.</p>",fact:{label:"🧬 KEY RESEARCH",text:"A 2019 MIT study found that dopamine neurons fire not at the reward itself, but at the prediction of the reward. You are already hooked before you even open the app."},type:"checklist",items:["Identify 1 trigger you experienced today","Name it out loud: This is a loop, not me","Write down what preceded the urge","Commit to one structural change today"]},
+  {id:2,tag:"BIOLOGY",title:"The Dopamine Triangle",meta:"10 min · Brain Chemistry",body:"<p>Here is something nobody tells you: <strong>sugar, digital stimulation, and explicit content use the exact same neural pathway.</strong> The nucleus accumbens cannot tell the difference.</p><p>When you binge sugar, you prime the dopamine system. When the spike crashes, your brain is in a low-dopamine state — desperate for a fix. In that state, <strong>your resistance is 70% lower.</strong> This is not coincidence. This is a chain reaction.</p><p>To break one addiction, <strong>you must stabilize the entire dopamine ecology.</strong> Reduce refined sugar, limit processed food, stop treating 'just a snack' as harmless.</p>",fact:{label:"🧬 KEY RESEARCH",text:"A 2018 study in Frontiers in Psychiatry demonstrated that high-glycemic foods trigger dopaminergic responses identical in structure to those seen in substance cravings."},type:"reflection",placeholder:"What sugar habits do you have that precede urges? Be specific: time, food, emotional state."},
+  {id:3,tag:"TRIGGERS",title:"The Post-Adrenaline Void",meta:"7 min · Psychology",body:"<p>The match ends. The movie finishes. And then — <strong>nothing.</strong> A void opens up, and your brain goes hunting.</p><p>This is called <strong>hedonic homeostasis</strong> — after a peak of stimulation, your brain compensates with a trough. In that trough, dopamine receptors are hungry. They will accept anything.</p><p>Your protocol: <strong>plan the transition.</strong> Before the match ends, decide what you're doing next. A walk. 20 push-ups. A cold shower. The decision made in advance requires no willpower in the moment.</p>",fact:{label:"🧬 KEY RESEARCH",text:"Neuroscientist Anna Lembke (Stanford): the bigger the pleasure peak, the deeper the pain valley — and the more dangerous the craving state that follows."},type:"reflection",placeholder:"When does your void occur? After sport? After work? After a movie? Write it specifically."},
+  {id:4,tag:"NEUROSCIENCE",title:"Neuroplasticity: Your Brain is Clay",meta:"9 min · Brain Science",body:"<p><strong>Every time you resist, you physically rewire your brain.</strong> Every time you give in, you deepen a groove. This is Hebbian plasticity — neurons that fire together, wire together.</p><p>The prefrontal cortex can grow stronger with use, like a muscle. But it tires. <strong>Willpower is a resource that depletes.</strong> Your goal is not to resist every urge. Your goal is to build a system that requires fewer resistances.</p>",fact:{label:"🧬 KEY RESEARCH",text:"A 2007 study: people who exercised impulse control in one domain showed improved control in unrelated domains within 2 weeks. Training resistance physically strengthens all resistance."},type:"checklist",items:["Remove problematic apps from phone","Enable website blockers on all devices","Charge phone outside bedroom tonight","Tell one person about your commitment"]},
+  {id:5,tag:"TRIGGERS",title:"Boredom is the Predator",meta:"6 min · Psychology",body:"<p>The single most common relapse trigger is <strong>boredom.</strong> Not stress. Not sadness. Boredom.</p><p>Boredom is a state of low dopamine with no assigned task. The brain cannot tolerate this. It will seek stimulation automatically, and the most easily accessible pathway wins.</p><p>Boredom is not a problem to be solved with stimulation. <strong>Boredom is a signal to rest.</strong></p>",fact:{label:"🧬 KEY RESEARCH",text:"A 2014 study in Science found that 67% of men preferred electric shocks over sitting alone with their thoughts for 15 minutes."},type:"urge"},
+  {id:6,tag:"STRATEGY",title:"The Friction Method",meta:"8 min · Behavioral Design",body:"<p>BJ Fogg: <strong>behavior = motivation x ability x trigger.</strong> Reduce any one of these and the behavior disappears.</p><p>You cannot always control your motivation. But you can <strong>destroy ability.</strong> Make the destructive behavior physically difficult. This is the Friction Method — structure beats willpower every single time.</p>",fact:{label:"🧬 THE RULE",text:"Every additional step required before accessing harmful content reduces the probability of access by approximately 30%. Three extra steps = 90% reduction."},type:"checklist",items:["Install a content blocker (Cold Turkey or Freedom)","Ask a trusted person to set the password","Move your router to another room at night","Delete and block all trigger apps"]},
+  {id:7,tag:"BIOLOGY",title:"Sugar: The Silent Saboteur",meta:"9 min · Nutrition",body:"<p>Your prefrontal cortex runs on stable glucose. When you spike blood sugar with refined carbs, you create a glycemic rollercoaster. <strong>On the way down from that spike, your decision-making collapses.</strong></p><p>A brain running on stable energy has 40% better impulse control than a brain in a sugar crash. This is not a diet tip. This is neurobiological security.</p>",fact:{label:"🧬 THE PROTOCOL",text:"No sugar after 6pm for 7 days. Replace with walnuts + water. You will notice a measurable drop in evening urges."},type:"checklist",items:["No sugar after 6pm today","Replace evening snack with nuts or water","Drank 2+ liters of water","Avoided ultra-processed food all day"]},
+  {id:8,tag:"TECHNIQUE",title:"Urge Surfing: Ride the Wave",meta:"7 min · CBT",body:"<p>Most people try to fight cravings. <strong>This is wrong.</strong> The neuroscience tells us a different approach: surf it.</p><p>Observe the craving without engaging with it. Watch it rise, peak, and fall. <strong>The average craving peaks within 15 minutes and subsides if not fed.</strong></p><p>When the urge comes: set a 15-minute timer, say 'I am watching this craving. I am not this craving.' Do not move. The wave will break.</p>",fact:{label:"🧬 KEY RESEARCH",text:"A 2016 clinical trial found that urge surfing reduced relapse rates by 47% compared to traditional suppression techniques."},type:"urge"},
+  {id:9,tag:"CASE STUDY",title:"The Engineering Student Protocol",meta:"8 min · Applied",body:"<p>Thomas, 22, studying late, consuming energy drinks. Night after night: sugar + fatigue + isolation = relapse.</p><p>Three structural changes: <strong>1) No energy drinks after 6pm. 2) 20 push-ups at the first sign of urge. 3) Phone charger moved to the hallway.</strong></p><p>Within 3 weeks, relapse frequency dropped from daily to zero. Not willpower — better engineering. <strong>You are not weak. You are poorly engineered.</strong></p>",fact:{label:"📊 THE LESSON",text:"Redesign your environment and the behavior changes automatically. This is the core insight of behavioral science."},type:"reflection",placeholder:"What are your 3 structural vulnerabilities? Time, location, emotional state before relapse."},
+  {id:10,tag:"TECHNIQUE",title:"The 5-Second Interrupt",meta:"5 min · Neuroscience",body:"<p>Counting backwards from 5 disrupts the habitual neural pathway. <strong>5-4-3-2-1 — then physical action immediately.</strong></p><p>Your brain operates on prediction loops with a ~500ms activation window. Counting disrupts the loop before it reaches its action threshold. The thought occurs, but the behavior doesn't fire.</p>",fact:{label:"🧬 THE MECHANISM",text:"The prefrontal cortex uses 30% more metabolic energy when counting vs passive thought. This pulls resources from the limbic system — where cravings originate."},type:"checklist",items:["Right now — stand up","Count 5-4-3-2-1 out loud","Walk to another room","Practice this now so it is automatic when needed","Apply at the first sign of any urge — even small ones"]},
+  {id:11,tag:"FOUNDATION",title:"Sleep: The First Defense",meta:"9 min · Sleep Science",body:"<p>After 24 hours of sleep deprivation, your prefrontal cortex functions at the equivalent of <strong>0.08% blood alcohol.</strong> You are impaired. And most relapses happen after 10pm — when sleep debt is highest.</p><p>During deep sleep, your glymphatic system flushes toxic metabolites from your brain. Without adequate sleep, cortisol remains elevated — and cortisol destroys impulse control.</p>",fact:{label:"🧬 KEY RESEARCH",text:"Matthew Walker (UC Berkeley): a single night under 6 hours causes 60% increase in amygdala reactivity. Your emotional brain becomes dominant. You will lose the fight if you are tired."},type:"checklist",items:["No screens in bedroom tonight","Phone charger moved to hallway","Phone off at 10pm","No caffeine after 2pm"]},
+  {id:12,tag:"BIOLOGY",title:"The Cold Shower Protocol",meta:"6 min · Neuroscience",body:"<p>Cold water immersion causes a <strong>250% increase in dopamine</strong> — slowly released, sustained for 2-3 hours. Compare this to artificial stimulation: sharp spike followed by a crash below baseline.</p><p>Used consistently for 3 weeks, cold exposure recalibrates your baseline dopamine level — reducing the intensity of artificial cravings.</p>",fact:{label:"⚡ THE PROTOCOL",text:"90 seconds is the minimum effective dose. End every shower with 90 seconds of coldest water. Breathe slowly through your nose. Do not escape. The discomfort is the medicine."},type:"checklist",items:["Finish regular shower as usual","Turn water to coldest setting","Stay in for exactly 90 seconds","Breathe through nose, slow and controlled","Log it done — build the chain"]},
+  {id:13,tag:"MINDSET",title:"The Myth of Just This Once",meta:"7 min · Cognitive Traps",body:"<p>The most dangerous lie: <strong>'Just this once won't matter.'</strong> It is entirely false.</p><p>After a period of abstinence, your dopamine receptors have begun to recover their sensitivity. A single exposure resets this process. <strong>Not partially. Completely.</strong> You do not return to day minus 1. You return to day zero, with shame added on top.</p>",fact:{label:"🧬 KEY RESEARCH",text:"A 2015 study in Nature Neuroscience: a single exposure after abstinence activates the reward system at 3x normal intensity due to receptor hypersensitivity. This is why 'just once' always becomes 'again.'"},type:"reflection",placeholder:"Write the exact words your brain uses to negotiate. 'Just this once because...' Getting specific on the lie weakens its power."},
+  {id:14,tag:"SOCIAL",title:"Connection is the Antidote",meta:"8 min · Social Neuroscience",body:"<p>The Rat Park experiment (1978): Rats isolated in cages became addicted. Rats given social connection and space largely refused it. <strong>Addiction thrives in isolation. Connection cures it.</strong></p><p>Genuine social connection releases oxytocin, which directly suppresses the dopaminergic craving system. A 10-minute face-to-face conversation produces more oxytocin than an hour of social media scrolling.</p>",fact:{label:"🧬 KEY INSIGHT",text:"Johann Hari: the opposite of addiction is not sobriety — it is connection. People who recovered from severe addictions cited social reconnection as the turning point."},type:"checklist",items:["Text or call one friend today","Plan a physical meetup this week","Go to a public place for 30 minutes","Delete 1 hour of screen time — replace with real conversation"]},
+  {id:15,tag:"NUTRITION",title:"The Anti-Impulse Diet",meta:"8 min · Nutritional Neuroscience",body:"<p>Your gut contains 100 million neurons and produces <strong>95% of your body's serotonin.</strong> Serotonin is your stability, your satisfaction. When your gut is inflamed from processed food, serotonin production collapses — and your brain becomes desperate.</p>",fact:{label:"🧬 THE PROTOCOL",text:"Prioritize: fatty fish, eggs, fermented foods, dark leafy greens. Eliminate: ultra-processed food, trans fats, high-fructose corn syrup. 14 days. You will notice measurably reduced craving intensity."},type:"checklist",items:["Whole food for breakfast today","No sugar after 6pm","2+ liters of water today","Avoided ultra-processed food all day"]},
+  {id:16,tag:"PRACTICE",title:"Meditation: Muscle for the Mind",meta:"9 min · Cognitive Training",body:"<p>Harvard researchers (Sara Lazar, 2011): <strong>8 weeks of consistent mindfulness measurably thickened the prefrontal cortex.</strong> Physically thicker. More neurons. More resistance capacity.</p><p>10 minutes every morning. Before your phone. Sit, close your eyes, breathe slowly. When a thought appears, label it — 'craving,' 'anxiety,' 'boredom' — and return to breath.</p>",fact:{label:"🧬 THE RESEARCH",text:"Lazar's study: 8 weeks of daily meditation produced structural cortical changes equivalent to years of cognitive training. Confirmed with as few as 10 minutes per day over 30 days."},type:"breath"},
+  {id:17,tag:"MINDSET",title:"The Reality Recalibration",meta:"7 min · Psychological Reset",body:"<p>After consistent exposure to hyper-stimulating content, your brain undergoes <strong>hedonic adaptation</strong> — it recalibrates its baseline pleasure upward. Real experiences begin to feel dull, flat, insufficient.</p><p>Neuroscientist Norman Doidge documented full hedonic recalibration within 90 days of abstinence. The brain's reward sensitivity returns to — and often exceeds — baseline. <strong>Real life becomes vivid again.</strong></p>",fact:{label:"🧬 THE RECOVERY",text:"fMRI scans: individuals with high digital consumption show significantly reduced activation in the reward center when exposed to natural stimuli. The damage is real — and so is the recovery."},type:"reflection",placeholder:"What did you experience today that was real, analog, and satisfying? Even small counts. Write it."},
+  {id:18,tag:"RESILIENCE",title:"The Relapse Protocol",meta:"8 min · Recovery Science",body:"<p>You may relapse. Most people who successfully recover do so after multiple attempts. <strong>A relapse is data. It is not a verdict.</strong></p><p>The most dangerous moment after a relapse is not the relapse itself — it is the shame spiral. Shame activates the limbic system, impairs prefrontal function, and makes a second relapse within 24 hours statistically likely. <strong>Guilt is the second relapse.</strong></p>",fact:{label:"🧬 THE SCIENCE",text:"Kelly McGonigal (Stanford): self-compassion after failure is a stronger predictor of long-term recovery than willpower. People who forgave themselves quickly returned to their protocol faster."},type:"reflection",placeholder:"Time: __ Location: __ Emotional state: __ Trigger: __ What I will do differently: __"},
+  {id:19,tag:"SYSTEM",title:"The 90-Day Reset",meta:"10 min · Long Game",body:"<p><strong>90 days is the minimum time for full dopamine receptor recovery.</strong> During this period, receptors that were downregulated from overstimulation gradually restore their baseline sensitivity.</p><p>Days 1-30: hardest. Days 31-60: intensity drops 40%. Days 61-90: urges become manageable background noise. <strong>The discomfort is not permanent. It is scheduled.</strong></p>",fact:{label:"🧬 THE NEUROSCIENCE",text:"A 2014 PET scan study tracked dopamine receptor density over 90 days of abstinence. Recovery to near-normal levels at week 8, continuing through week 12."},type:"checklist",items:["Buy or print a 90-day physical calendar","Mark today as Day 1","Set a daily reminder: Mark the calendar","Tell one person your 90-day goal","Screenshot this chapter as your reminder"]},
+  {id:20,tag:"FINAL",title:"Your New Architecture Starts Now",meta:"7 min · Activation",body:"<p>You have reached the end. But let's be direct: <strong>reading has done nothing.</strong> Knowledge stored in your head but not deployed in your life is worth exactly zero.</p><p>You now have the full architecture: the neuroscience of the dopamine loop, sugar's role, the cognitive traps, the friction method, urge surfing, cold exposure, sleep defense, nutrition protocol, and the 90-day reset. Every tool is evidence-based. Every tool works — when applied.</p><p><strong>The brain you want is not a destination. It is a daily construction project.</strong> Every morning you choose the protocol, you are building.</p>",fact:{label:"⚡ FINAL DIRECTIVE",text:"Right now, before you close this app: do ONE thing. Set up a blocker, move your phone charger, text someone, or start the 15-minute urge timer. One action now is worth a hundred intentions saved for later."},type:"checklist",items:["Move phone charger out of bedroom tonight","Install one content blocker before bed","Set a daily 10-min meditation reminder","Write tomorrow's 3 priorities before sleeping","Go to Tracker and mark Day 1"]}
+];
+
+const PROTOCOLS={
+  urge:{title:"URGE\nACTIVE",state:"You're in it right now. Execute immediately.",cards:[{icon:"🌊",label:"STEP 1 — URGE SURF",body:"Do not move. Set the 15-min timer in Tools. Observe. Don't engage.",action:"The urge will peak in 5 min and crash in 15. Outlast it."},{icon:"💨",label:"STEP 2 — BREATHE",body:"4 counts in. 7 hold. 8 out. Do 4 cycles right now.",action:"Cuts cortisol within 90 seconds."},{icon:"💪",label:"STEP 3 — PHYSICAL REDIRECT",body:"20 push-ups. Right now. On the floor.",action:"Forces blood to muscles. Breaks the neural loop in 45 seconds."}]},
+  bored:{title:"LOW\nENERGY",state:"Boredom is the predator. Act before it escalates.",cards:[{icon:"📖",label:"STEP 1 — READ",body:"Open a chapter. Give your brain a real task.",action:"Direct your mind or it will find its own direction."},{icon:"🚶",label:"STEP 2 — MOVE",body:"Go outside for 10 minutes. Change environment now.",action:"Environmental change breaks the stimulus-response chain."},{icon:"📞",label:"STEP 3 — CONNECT",body:"Text or call one person right now.",action:"Oxytocin from genuine connection suppresses craving."}]},
+  stressed:{title:"STRESS\nMODE",state:"Cortisol destroys prefrontal function. Counter it now.",cards:[{icon:"💨",label:"STEP 1 — BREATHE",body:"4-7-8 breathing. 4 cycles. 2 minutes. First.",action:"Cortisol reduction begins within 90 seconds."},{icon:"✍️",label:"STEP 2 — NAME IT",body:"Write one sentence: I am stressed because ___",action:"Labeling an emotion reduces intensity by 40% (UCLA research)."},{icon:"🧊",label:"STEP 3 — COLD SHOWER",body:"90 seconds. Coldest setting.",action:"Resets the nervous system faster than any other technique."}]},
+  good:{title:"IN\nCONTROL",state:"Build the system now. Don't wait for a crisis.",cards:[{icon:"📖",label:"STEP 1 — LEARN",body:"Read your next chapter while your mind is clear.",action:"Knowledge installed in good state is accessible in bad state."},{icon:"🔧",label:"STEP 2 — STRENGTHEN",body:"Add one friction barrier today.",action:"Build the wall now, before you need it."},{icon:"📊",label:"STEP 3 — TRACK",body:"Go to the Tracker and mark today as clean.",action:"The visual streak is more powerful than willpower."}]}
+};
+
+const MANTRAS=["I AM NOT THE CRAVING.\nI AM THE ONE\nWHO WATCHES IT.","THE URGE IS A WAVE.\nI AM THE SHORE.\nIT ALWAYS BREAKS.","EVERY SECOND I WAIT,\nI GET STRONGER.","MY BRAIN IS CLAY.\nI CHOOSE WHAT\nI SCULPT TODAY.","SHORT-TERM PAIN.\nLONG-TERM FREEDOM.","REAL LIFE IS RICHER\nTHAN ANY SCREEN\nCAN SHOW."];
+
+let state={streak:0,chapters:0,checkins:0,completed:[],day:1,journals:[]};
+function loadState(){try{const s=localStorage.getItem('mf3');if(s)state={...state,...JSON.parse(s)};}catch(e){}}
+function saveState(){try{localStorage.setItem('mf3',JSON.stringify(state));}catch(e){}}
+
+function goTab(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('s-'+name).classList.add('active');
+  const tab=document.getElementById('tab-'+name);
+  if(tab)tab.classList.add('active');
+  if(name==='tracker')renderTracker();
+}
+
+function renderChapters(){
+  document.getElementById('chapterList').innerHTML=CHAPTERS.map(ch=>{
+    const done=state.completed.includes(ch.id);
+    return`<div class="chapter-item${done?' done':''}" onclick="openChapter(${ch.id})"><div class="chapter-num">${String(ch.id).padStart(2,'0')}</div><div class="chapter-info"><div class="chapter-title">${ch.title}</div><div class="chapter-meta">${ch.tag} · ${ch.meta}</div></div><div style="font-size:16px;color:var(--muted2)">${done?'✅':'→'}</div></div>`;
+  }).join('');
+}
+
+function openChapter(id){
+  const ch=CHAPTERS.find(c=>c.id===id);if(!ch)return;
+  document.getElementById('progressFill').style.width=`${(id/20)*100}%`;
+  document.getElementById('readerNum').textContent=`${id}/20`;
+  const done=state.completed.includes(id);
+  let interactive='';
+  if(ch.type==='checklist'){
+    interactive=`<div class="interactive"><div class="interactive-title">✅ ACTION TASKS</div>${ch.items.map(item=>`<div class="check-item" onclick="this.classList.toggle('done')"><div class="check-box">✓</div><div class="check-text">${item}</div></div>`).join('')}</div>`;
+  }else if(ch.type==='reflection'){
+    interactive=`<div class="interactive"><div class="interactive-title">✍️ REFLECTION</div><textarea class="reflect-input" rows="4" placeholder="${ch.placeholder}"></textarea><button class="reflect-save" onclick="showToast('Saved ✓')">SAVE</button></div>`;
+  }else if(ch.type==='urge'){
+    interactive=`<div class="interactive"><div class="interactive-title">⏱ URGE TIMER</div><div class="timer-display" id="chUD">15:00</div><div class="timer-sub">Sit still. Watch.</div><button class="timer-btn" id="chUB" onclick="toggleChUrge()">START</button></div>`;
+  }else if(ch.type==='breath'){
+    interactive=`<div class="interactive"><div class="interactive-title">💨 4-7-8</div><div style="text-align:center;padding:10px 0"><div id="chBC" style="width:100px;height:100px;border-radius:50%;border:2px solid var(--red);display:inline-flex;align-items:center;justify-content:center;font-size:12px;color:var(--red);margin-bottom:12px;transition:transform .4s,border-color .4s">READY</div></div><button style="display:block;width:100%;padding:12px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;font-size:11px;color:var(--muted);cursor:pointer" id="chBB" onclick="toggleChBreath()">START PROTOCOL</button></div>`;
+  }
+  document.getElementById('chapterContent').innerHTML=`<div class="ch-tag">${ch.tag}</div><div class="ch-title">${ch.title}</div><div class="ch-body">${ch.body}</div><div class="fact-box"><div class="fact-label">${ch.fact.label}</div><p>${ch.fact.text}</p></div>${interactive}<button class="done-btn${done?' completed':''}" id="doneBtn" onclick="markDone(${id})" ${done?'disabled':''}>${done?'✅ Chapter Completed':'Mark as Complete →'}</button>`;
+  document.getElementById('tab-reader').style.display='';
+  goTab('reader');
+}
+
+function closeReader(){goTab('home');document.getElementById('tab-reader').style.display='none';renderChapters();}
+
+function markDone(id){
+  if(!state.completed.includes(id)){state.completed.push(id);state.chapters=state.completed.length;saveState();updateStats();}
+  const b=document.getElementById('doneBtn');b.textContent='✅ Chapter Completed';b.classList.add('completed');b.disabled=true;
+  showToast('🔥 Chapter locked in!');
+}
+
+let checkinAnswer=null;
+const OPTS=[{icon:"😤",text:"Urge is active",sub:"Feeling the pull right now",val:"urge"},{icon:"😔",text:"Low energy / bored",sub:"Empty, nothing to do",val:"bored"},{icon:"😰",text:"Stressed or anxious",sub:"Under pressure",val:"stressed"},{icon:"💪",text:"Clear and in control",sub:"Good — just checking in",val:"good"}];
+
+function startCheckin(){
+  checkinAnswer=null;
+  document.getElementById('checkinOpts').innerHTML=OPTS.map(o=>`<div class="option" onclick="selectOpt('${o.val}',this)"><div class="option-icon">${o.icon}</div><div><div class="option-text">${o.text}</div><div class="option-sub">${o.sub}</div></div></div>`).join('');
+  document.getElementById('checkinBtn').classList.remove('show');
+  document.getElementById('checkinOverlay').classList.add('show');
+}
+
+function selectOpt(val,el){document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));el.classList.add('selected');checkinAnswer=val;document.getElementById('checkinBtn').classList.add('show');}
+
+function submitCheckin(){
+  if(!checkinAnswer)return;
+  document.getElementById('checkinOverlay').classList.remove('show');
+  state.checkins++;saveState();updateStats();
+  const rx=PROTOCOLS[checkinAnswer];
+  document.getElementById('rxTitle').innerHTML=rx.title.replace('\n','<br>');
+  document.getElementById('rxState').textContent=rx.state;
+  document.getElementById('rxCards').innerHTML=rx.cards.map(c=>`<div class="rx-card"><div class="rx-card-header"><div style="font-size:20px">${c.icon}</div><div class="rx-card-label">${c.label}</div></div><div class="rx-card-body">${c.body}<div class="rx-action">→ ${c.action}</div></div></div>`).join('');
+  document.getElementById('rxOverlay').classList.add('show');
+}
+
+function closeRx(){document.getElementById('rxOverlay').classList.remove('show');}
+
+function updateStats(){
+  document.getElementById('statStreak').textContent=state.streak;
+  document.getElementById('statChapters').textContent=state.chapters;
+  document.getElementById('statCheckins').textContent=state.checkins;
+  document.getElementById('trackerStreak').textContent=state.streak;
+  document.getElementById('topDay').textContent='DAY '+state.day;
+}
+
+function renderTracker(){
+  document.getElementById('trackerStreak').textContent=state.streak;
+  let h='';for(let i=1;i<=90;i++)h+=`<div class="day-cell${i===state.day?' today':''}">${i}</div>`;
+  document.getElementById('daysGrid').innerHTML=h;
+}
+
+function logRelapse(){state.streak=0;saveState();updateStats();renderTracker();showToast('Logged. No shame. Restart now.');}
+
+let urgeI=null,urgeS=900,coldI=null,coldS=90,bI=null,bP=0,chUI=null,chUS=900,chBI=null,chBP=0,pushN=20,mantraIdx=0;
+const BD=[{label:'INHALE',dur:4000,style:'transform:scale(1.4);border-color:var(--green);color:var(--green)'},{label:'HOLD',dur:7000,style:'transform:scale(1.4);border-color:var(--amber);color:var(--amber)'},{label:'EXHALE',dur:8000,style:''}];
+
+function openTool(n){document.getElementById('modal-'+n).classList.add('show');if(n==='mantra')renderMantra();}
+function closeTool(n){document.getElementById('modal-'+n).classList.remove('show');}
+
+function toggleUrge(){
+  if(urgeI){clearInterval(urgeI);urgeI=null;document.getElementById('urgeBtn').textContent='RESUME';document.getElementById('urgeBtn').classList.remove('running');}
+  else{document.getElementById('urgeBtn').textContent='PAUSE';document.getElementById('urgeBtn').classList.add('running');
+    urgeI=setInterval(()=>{urgeS--;if(urgeS<=0){clearInterval(urgeI);urgeI=null;document.getElementById('urgeDisplay').textContent='00:00';document.getElementById('urgeBtn').textContent='✓ WAVE CRASHED';document.getElementById('urgeBtn').classList.remove('running');showToast('Wave broken. You won.');return;}
+    const m=Math.floor(urgeS/60),s=urgeS%60;document.getElementById('urgeDisplay').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;},1000);}
+}
+
+function toggleCold(){
+  if(coldI){clearInterval(coldI);coldI=null;document.getElementById('coldBtn').textContent='RESUME';document.getElementById('coldBtn').classList.remove('running');}
+  else{document.getElementById('coldBtn').textContent='STOP';document.getElementById('coldBtn').classList.add('running');
+    coldI=setInterval(()=>{coldS--;if(coldS<=0){clearInterval(coldI);coldI=null;document.getElementById('coldDisplay').textContent='0:00';document.getElementById('coldBtn').textContent='✅ DONE';document.getElementById('coldBtn').classList.remove('running');showToast('Done. +250% dopamine incoming.');return;}
+    const m=Math.floor(coldS/60),s=coldS%60;document.getElementById('coldDisplay').textContent=`${m}:${String(s).padStart(2,'0')}`;},1000);}
+}
+
+function toggleBreath(){
+  if(bI){clearTimeout(bI);bI=null;const c=document.getElementById('breathCircle');if(c){c.textContent='READY';c.style='';}document.getElementById('breathBtn').textContent='START PROTOCOL';return;}
+  document.getElementById('breathBtn').textContent='STOP';runBreath();
+}
+function runBreath(){const p=BD[bP%3];const c=document.getElementById('breathCircle');if(!c)return;c.textContent=p.label;c.style=p.style;bI=setTimeout(()=>{bP++;runBreath();},p.dur);}
+
+function toggleChUrge(){
+  if(chUI){clearInterval(chUI);chUI=null;const b=document.getElementById('chUB');if(b){b.textContent='RESUME';b.classList.remove('running');}}
+  else{const b=document.getElementById('chUB');if(b){b.textContent='PAUSE';b.classList.add('running');}
+    chUI=setInterval(()=>{chUS--;if(chUS<=0){clearInterval(chUI);chUI=null;const d=document.getElementById('chUD');if(d)d.textContent='00:00';const b=document.getElementById('chUB');if(b){b.textContent='✓ DONE';b.classList.remove('running');}showToast('Wave broken.');return;}
+    const m=Math.floor(chUS/60),s=chUS%60;const d=document.getElementById('chUD');if(d)d.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;},1000);}
+}
+
+function toggleChBreath(){
+  if(chBI){clearTimeout(chBI);chBI=null;const c=document.getElementById('chBC');if(c){c.textContent='READY';c.style='';}const b=document.getElementById('chBB');if(b)b.textContent='START PROTOCOL';return;}
+  const b=document.getElementById('chBB');if(b)b.textContent='STOP';runChBreath();
+}
+function runChBreath(){const p=BD[chBP%3];const c=document.getElementById('chBC');if(!c)return;c.textContent=p.label;c.style=p.style;chBI=setTimeout(()=>{chBP++;runChBreath();},p.dur);}
+
+function countPushup(){
+  if(pushN<=0)return;pushN--;document.getElementById('pushupDisplay').textContent=pushN;
+  if(pushN===0){document.getElementById('pushupBtn').textContent='✅ DONE';showToast('20 done. Urge redirected.');pushN=20;setTimeout(()=>{document.getElementById('pushupDisplay').textContent=20;document.getElementById('pushupBtn').textContent='TAP FOR EACH REP';},3000);}
+}
+
+function renderMantra(){document.getElementById('mantraText').innerHTML=MANTRAS[mantraIdx%MANTRAS.length].replace(/\n/g,'<br>');}
+function nextMantra(){mantraIdx++;renderMantra();}
+
+function saveJournal(){
+  const v=document.getElementById('journalInput').value.trim();if(!v)return;
+  state.journals=state.journals||[];state.journals.unshift({text:v,date:new Date().toLocaleDateString()});saveState();
+  document.getElementById('journalInput').value='';
+  document.getElementById('journalEntries').innerHTML=state.journals.slice(0,3).map(e=>`<div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px"><div style="font-size:10px;color:var(--muted2);margin-bottom:6px">${e.date}</div><div style="font-size:13px;color:var(--muted)">${e.text}</div></div>`).join('');
+  showToast('Entry saved.');
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+
+// ── PWA INSTALL ───────────────────────────────────────────────────────────
+let deferredPrompt=null;
+window.addEventListener("beforeinstallprompt", e=>{
+  e.preventDefault(); deferredPrompt=e;
+  document.getElementById("installBanner").classList.add("show");
+});
+function installApp(){
+  if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt=null; }
+  else {
+    const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+    if(isIOS){
+      document.getElementById('s1').innerHTML='Appuie sur le bouton <strong>Partager ⎙</strong> en bas de Safari';
+      document.getElementById('s2').innerHTML='Fais defiler et appuie sur <strong>"Sur l\'ecran d\'accueil"</strong>';
+      document.getElementById('s3').innerHTML='Appuie sur <strong>"Ajouter"</strong> ✅';
+    }
+    document.getElementById('iosGuide').classList.add('show');
+  }
+  document.getElementById("installBanner").classList.remove("show");
+}
+window.addEventListener("appinstalled",()=>{document.getElementById("installBanner").classList.remove("show");showToast("MindFree installe !");});
+
+// ── SERVICE WORKER inline ─────────────────────────────────────────────────
+if('serviceWorker' in navigator){
+  const swCode=`const CACHE='mf3-v1';self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./'])));});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('./'))));});`;
+  const blob=new Blob([swCode],{type:'application/javascript'});
+  const url=URL.createObjectURL(blob);
+  navigator.serviceWorker.register(url).catch(()=>{});
+}
+
+// ── WEB APP MANIFEST inline ───────────────────────────────────────────────
+const manifest={name:"MindFree",short_name:"MindFree",description:"21-Day Dopamine Reset Program",start_url:".",display:"standalone",background_color:"#0C0C0F",theme_color:"#0C0C0F",icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230C0C0F'/><text y='.9em' font-size='72' x='12'>🧠</text></svg>",sizes:"192x192",type:"image/svg+xml"}]};
+const mblob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+const murl=URL.createObjectURL(mblob);
+const ml=document.createElement('link');ml.rel='manifest';ml.href=murl;document.head.appendChild(ml);
+
+// ── BOOT ──────────────────────────────────────────────────────────────────
+window.addEventListener('load',()=>{
+  loadState();updateStats();renderChapters();
+  setTimeout(()=>{const s=document.getElementById('splash');s.style.opacity='0';setTimeout(()=>s.style.display='none',800);},2000);
+});
+</script>
+</body>
+</html>
